@@ -23,6 +23,8 @@ import { setTheme } from '@/store/slices/themeSlice';
 import { setLanguage } from '@/store/slices/languageSlice';
 import { logout } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
+import { PrivacyPolicyModal } from '@/components/PrivacyPolicyModal';
+import { TermsOfUseModal } from '@/components/TermsOfUseModal';
 
 interface DrawerMenuProps {
   onClose: () => void;
@@ -34,6 +36,8 @@ export function DrawerMenu({ onClose }: DrawerMenuProps) {
   const { colors } = useTheme();
   const { mode } = useSelector((state: RootState) => state.theme);
   const { currentLanguage } = useSelector((state: RootState) => state.language);
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [termsModalVisible, setTermsModalVisible] = useState(false);
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
     dispatch(setTheme(newTheme));
@@ -132,14 +136,20 @@ export function DrawerMenu({ onClose }: DrawerMenuProps) {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => setTermsModalVisible(true)}
+          >
             <FileText size={20} color={colors.primary} />
             <Text style={[styles.menuText, { color: colors.text }]}>
               {t('drawer.termsOfUse')}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => setPrivacyModalVisible(true)}
+          >
             <Shield size={20} color={colors.primary} />
             <Text style={[styles.menuText, { color: colors.text }]}>
               {t('drawer.privacyPolicy')}
@@ -160,6 +170,16 @@ export function DrawerMenu({ onClose }: DrawerMenuProps) {
             <Text style={styles.logoutText}>{t('account.logout')}</Text>
           </TouchableOpacity>
         </ScrollView>
+
+        <PrivacyPolicyModal
+          visible={privacyModalVisible}
+          onClose={() => setPrivacyModalVisible(false)}
+        />
+
+        <TermsOfUseModal
+          visible={termsModalVisible}
+          onClose={() => setTermsModalVisible(false)}
+        />
       </View>
     </View>
   );

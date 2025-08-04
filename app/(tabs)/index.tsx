@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -20,17 +20,28 @@ import { RootState } from '@/store/store';
 import { useTheme } from '@/hooks/useTheme';
 import { router } from 'expo-router';
 import { PaymentModal } from '@/components/PaymentModal';
+import { RestaurantSelector, mockRestaurants, Restaurant } from '@/components/RestaurantSelector';
+import { setSelectedRestaurant, setRestaurants } from '@/store/slices/restaurantSlice';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
+  const selectedRestaurant = useSelector((state: RootState) => state.restaurant.selectedRestaurant);
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
   const [selectedPaymentType, setSelectedPaymentType] = useState<
     'drink' | 'meal' | 'wallet'
   >('wallet');
 
   const [showWelcome, setShowWelcome] = useState(true);
+
+  useEffect(() => {
+    // Initialize restaurants data
+    dispatch(setRestaurants(mockRestaurants));
+    if (!selectedRestaurant) {
+      dispatch(setSelectedRestaurant(mockRestaurants[0]));
+    }
+  }, [dispatch, selectedRestaurant]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -59,6 +70,17 @@ export default function HomeScreen() {
     setPaymentModalVisible(true);
   };
 
+  const handleRestaurantChange = (restaurant: Restaurant) => {
+    // Restaurant change is handled in the RestaurantSelector component
+  };
+
+  // Use selected restaurant's balance or fallback to default
+  const currentBalance = selectedRestaurant?.userBalance || {
+    walletBalance: 0,
+    drinkPoints: 0,
+    mealPoints: 0,
+  };
+
   return (
     <>
       <ScrollView
@@ -75,6 +97,8 @@ export default function HomeScreen() {
         )}
 
         <View style={styles.content}>
+          <RestaurantSelector onRestaurantChange={handleRestaurantChange} />
+
           <TouchableOpacity
             style={[styles.primaryButton, { backgroundColor: colors.primary }]}
             onPress={handleScanCode}
@@ -114,7 +138,7 @@ export default function HomeScreen() {
                 >
                   <Wallet size={24} color={colors.success} />
                   <Text style={{ color: colors.success }}>
-                    {user.walletBalance.toFixed(2)} $
+                    {currentBalance.walletBalance.toFixed(2)} $
                   </Text>
                 </View>
                 <View
@@ -129,7 +153,7 @@ export default function HomeScreen() {
                 >
                   <UtensilsCrossed size={24} color={colors.primary} />
                   <Text style={{ color: colors.success }}>
-                    {user.mealPoints} <Star size={16} color={colors.success} />
+                    {currentBalance.mealPoints} <Star size={16} color={colors.success} />
                   </Text>
                 </View>
                 <View
@@ -144,7 +168,7 @@ export default function HomeScreen() {
                 >
                   <Coffee size={24} color={colors.secondary} />
                   <Text style={{ color: colors.success }}>
-                    {user.drinkPoints} <Star size={16} color={colors.success} />
+                    {currentBalance.drinkPoints} <Star size={16} color={colors.success} />
                   </Text>
                 </View>
               </View>

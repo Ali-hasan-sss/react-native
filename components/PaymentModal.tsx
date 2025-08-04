@@ -24,11 +24,7 @@ import {
   X,
 } from 'lucide-react-native';
 import { RootState } from '@/store/store';
-import {
-  updateBalance,
-  updateDrinkPoints,
-  updateMealPoints,
-} from '@/store/slices/userSlice';
+import { updateRestaurantBalance } from '@/store/slices/restaurantSlice';
 import { useTheme } from '@/hooks/useTheme';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -53,19 +49,26 @@ export function PaymentModal({
   const { t } = useTranslation();
   const { colors } = useTheme();
   const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.user);
+  const selectedRestaurant = useSelector((state: RootState) => state.restaurant.selectedRestaurant);
 
   const [selectedPaymentType, setSelectedPaymentType] = useState<
     'drink' | 'meal' | 'wallet'
   >(initialPaymentType);
   const [amount, setAmount] = useState('');
 
+  // Use selected restaurant's balance or fallback to default
+  const currentBalance = selectedRestaurant?.userBalance || {
+    walletBalance: 0,
+    drinkPoints: 0,
+    mealPoints: 0,
+  };
+
   const paymentOptions = [
     {
       type: 'wallet' as const,
       label: t('purchase.walletBalance'),
       icon: Wallet,
-      balance: user.walletBalance,
+      balance: currentBalance.walletBalance,
       color: colors.success,
       prefix: '$',
     },
@@ -73,7 +76,7 @@ export function PaymentModal({
       type: 'drink' as const,
       label: t('purchase.drinkPoints'),
       icon: Coffee,
-      balance: user.drinkPoints,
+      balance: currentBalance.drinkPoints,
       color: colors.secondary,
       prefix: '',
     },
@@ -81,7 +84,7 @@ export function PaymentModal({
       type: 'meal' as const,
       label: t('purchase.mealPoints'),
       icon: UtensilsCrossed,
-      balance: user.mealPoints,
+      balance: currentBalance.mealPoints,
       color: colors.primary,
       prefix: '',
     },
@@ -94,6 +97,11 @@ export function PaymentModal({
   const hasInsufficientBalance = numericAmount > (selectedOption?.balance || 0);
 
   const handleSlideConfirm = () => {
+    if (!selectedRestaurant) {
+      Alert.alert(t('common.error'), 'Please select a restaurant first');
+      return;
+    }
+
     // منع إعادة السحب إذا لم يتم إدخال قيمة صحيحة
     if (!amount || numericAmount <= 0) {
       Alert.alert(t('common.error'), 'Please enter a valid amount');
@@ -106,15 +114,28 @@ export function PaymentModal({
     }
 
     // تنفيذ الدفع
+    const newBalance = (selectedOption?.balance || 0) - numericAmount;
     switch (selectedPaymentType) {
       case 'wallet':
-        dispatch(updateBalance(user.walletBalance - numericAmount));
+        dispatch(updateRestaurantBalance({
+          restaurantId: selectedRestaurant.id,
+          balanceType: 'walletBalance',
+          amount: newBalance,
+        }));
         break;
       case 'drink':
-        dispatch(updateDrinkPoints(user.drinkPoints - numericAmount));
+        dispatch(updateRestaurantBalance({
+          restaurantId: selectedRestaurant.id,
+          balanceType: 'drinkPoints',
+          amount: newBalance,
+        }));
         break;
       case 'meal':
-        dispatch(updateMealPoints(user.mealPoints - numericAmount));
+        dispatch(updateRestaurantBalance({
+          restaurantId: selectedRestaurant.id,
+          balanceType: 'mealPoints',
+          amount: newBalance,
+        }));
         break;
     }
 

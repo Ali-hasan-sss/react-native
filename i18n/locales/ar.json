@@ -9,7 +9,10 @@
     "registerButton": "إنشاء حساب",
     "forgotPassword": "نسيت كلمة المرور؟",
     "noAccount": "ليس لديك حساب؟",
-    "hasAccount": "لديك حساب بالفعل؟"
+    "hasAccount": "لديك حساب بالفعل؟",
+    "agreeToTerms": "أوافق على سياسة الخصوصية وشروط الاستخدام",
+    "privacyPolicy": "سياسة الخصوصية",
+    "termsOfUse": "شروط الاستخدام"
   },
   "home": {
     "title": "مكافآت الولاء",

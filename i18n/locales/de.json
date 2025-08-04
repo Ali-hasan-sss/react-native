@@ -9,7 +9,10 @@
     "registerButton": "Registrieren",
     "forgotPassword": "Passwort vergessen?",
     "noAccount": "Noch kein Konto?",
-    "hasAccount": "Bereits ein Konto?"
+    "hasAccount": "Bereits ein Konto?",
+    "agreeToTerms": "Ich stimme der Datenschutzrichtlinie und den Nutzungsbedingungen zu",
+    "privacyPolicy": "Datenschutzrichtlinie",
+    "termsOfUse": "Nutzungsbedingungen"
   },
   "home": {
     "title": "Treueprogramm",

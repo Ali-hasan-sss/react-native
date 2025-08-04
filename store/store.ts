@@ -3,6 +3,7 @@ import authSlice from './slices/authSlice';
 import themeSlice from './slices/themeSlice';
 import languageSlice from './slices/languageSlice';
 import userSlice from './slices/userSlice';
+import restaurantSlice from './slices/restaurantSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     theme: themeSlice,
     language: languageSlice,
     user: userSlice,
+    restaurant: restaurantSlice,
   },
 });
 

@@ -9,7 +9,10 @@
     "registerButton": "Sign Up",
     "forgotPassword": "Forgot Password?",
     "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?"
+    "hasAccount": "Already have an account?",
+    "agreeToTerms": "I agree to the Privacy Policy and Terms of Use",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use"
   },
   "home": {
     "title": "Loyalty Rewards",

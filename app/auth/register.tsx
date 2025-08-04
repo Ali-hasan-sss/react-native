@@ -201,4 +201,19 @@ const styles = StyleSheet.create({
   link: {
     fontWeight: '600',
   },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 16,
+    gap: 8,
+  },
+  checkboxText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  linkText: {
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
 });

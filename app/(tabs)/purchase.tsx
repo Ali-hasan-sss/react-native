@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   Modal,
+  Alert,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
@@ -24,18 +25,27 @@ import { RootState } from '@/store/store';
 import { useTheme } from '@/hooks/useTheme';
 import { router } from 'expo-router';
 import QRCode from 'react-native-qrcode-svg';
+import { RestaurantSelector, Restaurant } from '@/components/RestaurantSelector';
 
 export default function PurchaseScreen() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { colors } = useTheme();
   const auth = useSelector((state: RootState) => state.auth);
-  const user = useSelector((state: RootState) => state.user);
+  const selectedRestaurant = useSelector((state: RootState) => state.restaurant.selectedRestaurant);
   const [giftModalVisible, setGiftModalVisible] = useState(false);
   const [selectedGiftType, setSelectedGiftType] = useState<
     'wallet' | 'drink' | 'meal'
   >('wallet');
   const [giftAmount, setGiftAmount] = useState('');
+
+  // Use selected restaurant's balance or fallback to default
+  const currentBalance = selectedRestaurant?.userBalance || {
+    walletBalance: 0,
+    drinkPoints: 0,
+    mealPoints: 0,
+  };
+
   React.useEffect(() => {
     // Generate QR code when component mounts
     const qrData = JSON.stringify({
@@ -46,11 +56,19 @@ export default function PurchaseScreen() {
   }, [auth.user, dispatch]);
 
   const handleRecharge = () => {
+    if (!selectedRestaurant) {
+      Alert.alert(t('common.error'), 'Please select a restaurant first');
+      return;
+    }
     // Handle PayPal integration for wallet recharge
     console.log('Initiating PayPal recharge...');
   };
 
   const handleGiftFriend = () => {
+    if (!selectedRestaurant) {
+      Alert.alert(t('common.error'), 'Please select a restaurant first');
+      return;
+    }
     setGiftModalVisible(true);
   };
 
@@ -64,6 +82,10 @@ export default function PurchaseScreen() {
   };
 
   const sendGift = () => {
+    if (!selectedRestaurant) {
+      Alert.alert(t('common.error'), 'Please select a restaurant first');
+      return;
+    }
     // Handle sending gift
     setGiftModalVisible(false);
   };
@@ -78,6 +100,10 @@ export default function PurchaseScreen() {
         <Text style={[styles.title, { color: colors.text }]}>
           {t('purchase.title')}
         </Text>
+      </View>
+
+      <View style={styles.restaurantSection}>
+        <RestaurantSelector />
       </View>
 
       <View style={styles.balanceSection}>
@@ -99,7 +125,7 @@ export default function PurchaseScreen() {
               {t('purchase.mealPoints')}
             </Text>
             <Text style={[styles.balanceValue, { color: colors.text }]}>
-              {user.mealPoints}
+              {currentBalance.mealPoints}
             </Text>
           </View>
 
@@ -120,7 +146,7 @@ export default function PurchaseScreen() {
               {t('purchase.drinkPoints')}
             </Text>
             <Text style={[styles.balanceValue, { color: colors.text }]}>
-              {user.drinkPoints}
+              {currentBalance.drinkPoints}
             </Text>
           </View>
         </View>
@@ -141,7 +167,7 @@ export default function PurchaseScreen() {
               {t('purchase.walletBalance')}
             </Text>
             <Text style={[styles.walletValue, { color: colors.text }]}>
-              ${user.walletBalance.toFixed(2)}
+              ${currentBalance.walletBalance.toFixed(2)}
             </Text>
           </View>
         </View>
@@ -219,9 +245,9 @@ export default function PurchaseScreen() {
               </Text>
             </View>
             <View style={styles.qrContainer}>
-              {user.qrCode ? (
+              {auth.user ? (
                 <QRCode
-                  value={user.qrCode}
+                  value={JSON.stringify({ userId: auth.user.id, email: auth.user.email })}
                   size={200}
                   color={colors.text}
                   backgroundColor={colors.background}
@@ -373,6 +399,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  restaurantSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
   },
   balanceSection: {
     padding: 20,
