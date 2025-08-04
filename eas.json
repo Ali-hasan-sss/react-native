@@ -1,0 +1,26 @@
+{
+  "cli": {
+    "version": ">= 16.17.4",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "resourceClass": "medium",
+      "env": {
+        "KOTLIN_VERSION": "1.9.10",
+        "ANDROID_NDK": "26.2.11394342"
+      }
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

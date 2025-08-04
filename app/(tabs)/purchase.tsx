@@ -195,7 +195,7 @@ export default function PurchaseScreen() {
             </Text>
           </View>
         </TouchableOpacity>
-        <View style={[styles.qrcontainer, { backgroundColor: colors.surface }]}>
+        <View style={[{ backgroundColor: colors.surface }]}>
           <View
             style={[styles.qrCard, { backgroundColor: colors.surface }]}
             //onPress={handleReceiveFromFriend}
@@ -208,8 +208,8 @@ export default function PurchaseScreen() {
             >
               <Camera size={32} color={colors.primary} />
             </View>
-            <View style={[styles.section, { backgroundColor: colors.surface }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <View style={[{ backgroundColor: colors.surface }]}>
+              <Text style={[{ color: colors.text }]}>
                 {t('account.myQRCode')}
               </Text>
               <Text
@@ -452,7 +452,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     flexDirection: 'column',
     justifyContent: 'center',
-    textAlighn: 'center',
     alignItems: 'center',
     padding: 20,
     marginBottom: 16,

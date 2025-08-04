@@ -102,7 +102,6 @@ export default function HomeScreen() {
                   { backgroundColor: colors.success + '20' },
                 ]}
               >
-                {' '}
                 <View
                   style={{
                     borderRadius: 12,

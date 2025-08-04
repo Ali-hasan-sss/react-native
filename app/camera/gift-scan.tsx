@@ -18,7 +18,13 @@ export default function GiftScanScreen() {
     }
   }, [permission, requestPermission]);
 
-  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+  const handleBarCodeScanned = ({
+    type,
+    data,
+  }: {
+    type: string;
+    data: string;
+  }) => {
     Alert.alert('Recipient Found', `Ready to send gift to: ${data}`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Send Gift', onPress: () => router.back() },
@@ -47,18 +53,22 @@ export default function GiftScanScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraView
-        style={styles.camera}
-        facing={facing}
-        onBarcodeScanned={handleBarCodeScanned}
-        barcodeScannerSettings={{
-          barcodeTypes: ['qr'],
-        }}
-      >
+      <View style={styles.container}>
+        <CameraView
+          style={StyleSheet.absoluteFill}
+          facing={facing}
+          onBarcodeScanned={handleBarCodeScanned}
+          barcodeScannerSettings={{
+            barcodeTypes: ['qr'],
+          }}
+        />
         <View style={styles.overlay}>
           <View style={styles.header}>
             <TouchableOpacity
-              style={[styles.closeButton, { backgroundColor: colors.background }]}
+              style={[
+                styles.closeButton,
+                { backgroundColor: colors.background },
+              ]}
               onPress={() => router.back()}
             >
               <X size={24} color={colors.text} />
@@ -72,7 +82,7 @@ export default function GiftScanScreen() {
             </Text>
           </View>
         </View>
-      </CameraView>
+      </View>
     </View>
   );
 }
