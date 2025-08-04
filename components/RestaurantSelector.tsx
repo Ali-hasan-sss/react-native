@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Check } from 'lucide-react-native';
+import { ChevronDown, Check,X } from 'lucide-react-native';
 import { RootState } from '@/store/store';
 import { setSelectedRestaurant } from '@/store/slices/restaurantSlice';
 import { useTheme } from '@/hooks/useTheme';
