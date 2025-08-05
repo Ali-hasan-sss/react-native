@@ -9,10 +9,13 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { Search, Filter, MapPin } from 'lucide-react-native';
+import { Search, Filter, MapPin, Plus } from 'lucide-react-native';
+import { RootState } from '@/store/store';
 import { useTheme } from '@/hooks/useTheme';
 import { RestaurantMapModal } from '@/components/RestaurantMapModal';
+import { CreateAdModal } from '@/components/CreateAdModal';
 
 interface Promotion {
   id: string;
@@ -68,13 +71,16 @@ const mockPromotions: Promotion[] = [
 export default function PromotionsScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const auth = useSelector((state: RootState) => state.auth);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedFilters, setSelectedFilters] = React.useState<string[]>([]);
   const [showFilters, setShowFilters] = React.useState(false);
   const [mapModalVisible, setMapModalVisible] = React.useState(false);
   const [selectedRestaurant, setSelectedRestaurant] =
     React.useState<Promotion | null>(null);
+  const [createAdModalVisible, setCreateAdModalVisible] = React.useState(false);
 
+  const isRestaurant = auth.user?.accountType === 'restaurant';
   const filters = [
     { key: 'food', label: t('promotions.food') },
     { key: 'drinks', label: t('promotions.drinks') },
@@ -237,6 +243,14 @@ export default function PromotionsScreen() {
         />
       </View>
 
+      {isRestaurant && (
+        <TouchableOpacity
+          style={[styles.fab, { backgroundColor: colors.primary }]}
+          onPress={() => setCreateAdModalVisible(true)}
+        >
+          <Plus size={24} color="white" />
+        </TouchableOpacity>
+      )}
       {selectedRestaurant && (
         <RestaurantMapModal
           visible={mapModalVisible}
@@ -249,6 +263,11 @@ export default function PromotionsScreen() {
           }}
         />
       )}
+
+      <CreateAdModal
+        visible={createAdModalVisible}
+        onClose={() => setCreateAdModalVisible(false)}
+      />
     </>
   );
 }
@@ -361,5 +380,20 @@ const styles = StyleSheet.create({
   validUntil: {
     fontSize: 12,
     fontWeight: '500',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });

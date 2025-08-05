@@ -16,11 +16,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Mail, Lock } from 'lucide-react-native';
 import { loginStart, loginSuccess } from '@/store/slices/authSlice';
 import { useTheme } from '@/hooks/useTheme';
+import { Checkbox } from '@/components/Checkbox';
+import { PrivacyPolicyModal } from '@/components/PrivacyPolicyModal';
+import { TermsOfUseModal } from '@/components/TermsOfUseModal';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [termsModalVisible, setTermsModalVisible] = useState(false);
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -28,6 +34,11 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert(t('common.error'), 'Please fill in all fields');
+      return;
+    }
+
+    if (!agreedToTerms) {
+      Alert.alert(t('common.error'), 'Please agree to the terms and conditions');
       return;
     }
 
@@ -39,7 +50,7 @@ export default function LoginScreen() {
       dispatch(loginSuccess({
         id: '1',
         email,
-        name: 'John Doe',
+        name: email === 'restaurant@example.com' ? 'Restaurant Owner' : 'John Doe',
       }));
       setLoading(false);
       router.replace('/(tabs)');
@@ -47,6 +58,7 @@ export default function LoginScreen() {
   };
 
   return (
+    <>
     <LinearGradient
       colors={colors.gradient}
       style={styles.container}
@@ -86,10 +98,36 @@ export default function LoginScreen() {
               />
             </View>
 
+            <View style={styles.checkboxContainer}>
+              <Checkbox
+                checked={agreedToTerms}
+                onPress={() => setAgreedToTerms(!agreedToTerms)}
+              />
+              <Text style={[styles.checkboxText, { color: colors.textSecondary }]}>
+                {t('auth.agreeToTerms').split(' ').slice(0, 4).join(' ')}{' '}
+                <TouchableOpacity onPress={() => setPrivacyModalVisible(true)}>
+                  <Text style={[styles.linkText, { color: colors.primary }]}>
+                    {t('auth.privacyPolicy')}
+                  </Text>
+                </TouchableOpacity>
+                {' '}{t('common.and')}{' '}
+                <TouchableOpacity onPress={() => setTermsModalVisible(true)}>
+                  <Text style={[styles.linkText, { color: colors.primary }]}>
+                    {t('auth.termsOfUse')}
+                  </Text>
+                </TouchableOpacity>
+              </Text>
+            </View>
+
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: colors.primary }]}
+              style={[
+                styles.button,
+                {
+                  backgroundColor: agreedToTerms ? colors.primary : colors.border,
+                },
+              ]}
               onPress={handleLogin}
-              disabled={loading}
+              disabled={loading || !agreedToTerms}
             >
               <Text style={styles.buttonText}>
                 {loading ? t('common.loading') : t('auth.loginButton')}
@@ -110,6 +148,17 @@ export default function LoginScreen() {
         </View>
       </KeyboardAvoidingView>
     </LinearGradient>
+
+      <PrivacyPolicyModal
+        visible={privacyModalVisible}
+        onClose={() => setPrivacyModalVisible(false)}
+      />
+
+      <TermsOfUseModal
+        visible={termsModalVisible}
+        onClose={() => setTermsModalVisible(false)}
+      />
+    </>
   );
 }
 

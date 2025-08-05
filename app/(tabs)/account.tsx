@@ -11,7 +11,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'react-native-qrcode-svg';
-import { User, Phone, Mail, Lock, Save } from 'lucide-react-native';
+import { User, Phone, Mail, Lock, Save, Crown } from 'lucide-react-native';
 import { RootState } from '@/store/store';
 import { updateProfile } from '@/store/slices/authSlice';
 import { updatePhoneNumber, generateQRCode } from '@/store/slices/userSlice';
@@ -24,6 +24,8 @@ export default function AccountScreen() {
   const auth = useSelector((state: RootState) => state.auth);
   const user = useSelector((state: RootState) => state.user);
 
+  const isRestaurant = auth.user?.accountType === 'restaurant';
+
   const [name, setName] = useState(auth.user?.name || '');
   const [email, setEmail] = useState(auth.user?.email || '');
   const [phone, setPhone] = useState(user.phoneNumber);
@@ -32,12 +34,14 @@ export default function AccountScreen() {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   React.useEffect(() => {
-    // Generate QR code when component mounts
-    const qrData = JSON.stringify({
-      userId: auth.user?.id,
-      email: auth.user?.email,
-    });
-    dispatch(generateQRCode(qrData));
+    if (!isRestaurant) {
+      // Generate QR code when component mounts (only for users)
+      const qrData = JSON.stringify({
+        userId: auth.user?.id,
+        email: auth.user?.email,
+      });
+      dispatch(generateQRCode(qrData));
+    }
   }, [auth.user, dispatch]);
 
   const handleSaveProfile = () => {
@@ -66,6 +70,9 @@ export default function AccountScreen() {
     setConfirmNewPassword('');
   };
 
+  const handleUpgradePlan = () => {
+    Alert.alert(t('restaurant.upgradePlan'), 'Upgrade plan feature coming soon!');
+  };
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
@@ -174,31 +181,48 @@ export default function AccountScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            {t('account.myQRCode')}
-          </Text>
-          <Text style={[styles.qrDescription, { color: colors.textSecondary }]}>
-            {t('account.qrCodeDesc')}
-          </Text>
-          
-          <View style={styles.qrContainer}>
-            {user.qrCode ? (
-              <QRCode
-                value={user.qrCode}
-                size={200}
-                color={colors.text}
-                backgroundColor={colors.background}
-              />
-            ) : (
-              <View style={[styles.qrPlaceholder, { backgroundColor: colors.background }]}>
-                <Text style={[styles.qrPlaceholderText, { color: colors.textSecondary }]}>
-                  QR Code
-                </Text>
-              </View>
-            )}
+        {isRestaurant ? (
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('restaurant.planManagement')}
+            </Text>
+            <TouchableOpacity
+              style={[styles.upgradeButton, { backgroundColor: colors.secondary }]}
+              onPress={handleUpgradePlan}
+            >
+              <Crown size={20} color="white" />
+              <Text style={styles.upgradeButtonText}>
+                {t('restaurant.upgradePlan')}
+              </Text>
+            </TouchableOpacity>
           </View>
-        </View>
+        ) : (
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('account.myQRCode')}
+            </Text>
+            <Text style={[styles.qrDescription, { color: colors.textSecondary }]}>
+              {t('account.qrCodeDesc')}
+            </Text>
+            
+            <View style={styles.qrContainer}>
+              {user.qrCode ? (
+                <QRCode
+                  value={user.qrCode}
+                  size={200}
+                  color={colors.text}
+                  backgroundColor={colors.background}
+                />
+              ) : (
+                <View style={[styles.qrPlaceholder, { backgroundColor: colors.background }]}>
+                  <Text style={[styles.qrPlaceholderText, { color: colors.textSecondary }]}>
+                    QR Code
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -280,5 +304,18 @@ const styles = StyleSheet.create({
   },
   qrPlaceholderText: {
     fontSize: 16,
+  },
+  upgradeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  upgradeButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

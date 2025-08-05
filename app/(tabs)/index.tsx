@@ -15,6 +15,7 @@ import {
   Star,
   UtensilsCrossed,
   Wallet,
+  QrCode,
 } from 'lucide-react-native';
 import { RootState } from '@/store/store';
 import { useTheme } from '@/hooks/useTheme';
@@ -22,11 +23,13 @@ import { router } from 'expo-router';
 import { PaymentModal } from '@/components/PaymentModal';
 import { RestaurantSelector, mockRestaurants, Restaurant } from '@/components/RestaurantSelector';
 import { setSelectedRestaurant, setRestaurants } from '@/store/slices/restaurantSlice';
+import QRCode from 'react-native-qrcode-svg';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const dispatch = useDispatch();
+  const auth = useSelector((state: RootState) => state.auth);
   const selectedRestaurant = useSelector((state: RootState) => state.restaurant.selectedRestaurant);
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
   const [selectedPaymentType, setSelectedPaymentType] = useState<
@@ -34,6 +37,7 @@ export default function HomeScreen() {
   >('wallet');
 
   const [showWelcome, setShowWelcome] = useState(true);
+  const isRestaurant = auth.user?.accountType === 'restaurant';
 
   useEffect(() => {
     // Initialize restaurants data
@@ -81,6 +85,19 @@ export default function HomeScreen() {
     mealPoints: 0,
   };
 
+  // Restaurant QR codes
+  const restaurantCodes = {
+    meals: JSON.stringify({
+      type: 'meal',
+      restaurantId: selectedRestaurant?.id || '1',
+      restaurantName: selectedRestaurant?.name || 'Restaurant',
+    }),
+    drinks: JSON.stringify({
+      type: 'drink',
+      restaurantId: selectedRestaurant?.id || '1',
+      restaurantName: selectedRestaurant?.name || 'Restaurant',
+    }),
+  };
   return (
     <>
       <ScrollView
@@ -97,94 +114,143 @@ export default function HomeScreen() {
         )}
 
         <View style={styles.content}>
-          <RestaurantSelector onRestaurantChange={handleRestaurantChange} />
+          {!isRestaurant && (
+            <RestaurantSelector onRestaurantChange={handleRestaurantChange} />
+          )}
 
-          <TouchableOpacity
-            style={[styles.primaryButton, { backgroundColor: colors.primary }]}
-            onPress={handleScanCode}
-          >
-            <Camera size={32} color="white" />
-            <View style={styles.buttonTextContainer}>
-              <Text style={styles.primaryButtonText}>{t('home.scanCode')}</Text>
-              <Text style={styles.primaryButtonDesc}>
-                {t('home.scanCodeDesc')}
+          {isRestaurant ? (
+            <View style={styles.restaurantSection}>
+              <Text style={[styles.restaurantTitle, { color: colors.text }]}>
+                {selectedRestaurant?.name || 'My Restaurant'}
               </Text>
-            </View>
-          </TouchableOpacity>
+              
+              <View style={styles.qrCodesContainer}>
+                <View style={[styles.qrCodeCard, { backgroundColor: colors.surface }]}>
+                  <View style={styles.qrCodeHeader}>
+                    <UtensilsCrossed size={24} color={colors.primary} />
+                    <Text style={[styles.qrCodeTitle, { color: colors.text }]}>
+                      {t('restaurant.mealsCode')}
+                    </Text>
+                  </View>
+                  <View style={styles.qrCodeWrapper}>
+                    <QRCode
+                      value={restaurantCodes.meals}
+                      size={120}
+                      color={colors.text}
+                      backgroundColor={colors.background}
+                    />
+                  </View>
+                </View>
 
-          <View style={styles.paymentButtons}>
-            <TouchableOpacity
-              style={[
-                styles.paymentButton,
-                { backgroundColor: colors.surface },
-              ]}
-              onPress={handlePayWithWallet}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: colors.success + '20' },
-                ]}
-              >
-                <View
-                  style={{
-                    borderRadius: 12,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <Wallet size={24} color={colors.success} />
-                  <Text style={{ color: colors.success }}>
-                    {currentBalance.walletBalance.toFixed(2)} $
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    borderRadius: 12,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <UtensilsCrossed size={24} color={colors.primary} />
-                  <Text style={{ color: colors.success }}>
-                    {currentBalance.mealPoints} <Star size={16} color={colors.success} />
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    borderRadius: 12,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <Coffee size={24} color={colors.secondary} />
-                  <Text style={{ color: colors.success }}>
-                    {currentBalance.drinkPoints} <Star size={16} color={colors.success} />
-                  </Text>
+                <View style={[styles.qrCodeCard, { backgroundColor: colors.surface }]}>
+                  <View style={styles.qrCodeHeader}>
+                    <Coffee size={24} color={colors.secondary} />
+                    <Text style={[styles.qrCodeTitle, { color: colors.text }]}>
+                      {t('restaurant.drinksCode')}
+                    </Text>
+                  </View>
+                  <View style={styles.qrCodeWrapper}>
+                    <QRCode
+                      value={restaurantCodes.drinks}
+                      size={120}
+                      color={colors.text}
+                      backgroundColor={colors.background}
+                    />
+                  </View>
                 </View>
               </View>
-              <Text style={[styles.paymentButtonText, { color: colors.text }]}>
-                {t('home.payWallet')}
-              </Text>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+              onPress={handleScanCode}
+            >
+              <Camera size={32} color="white" />
+              <View style={styles.buttonTextContainer}>
+                <Text style={styles.primaryButtonText}>{t('home.scanCode')}</Text>
+                <Text style={styles.primaryButtonDesc}>
+                  {t('home.scanCodeDesc')}
+                </Text>
+              </View>
             </TouchableOpacity>
-          </View>
+          )}
+          {!isRestaurant && (
+            <View style={styles.paymentButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.paymentButton,
+                  { backgroundColor: colors.surface },
+                ]}
+                onPress={handlePayWithWallet}
+              >
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: colors.success + '20' },
+                  ]}
+                >
+                  <View
+                    style={{
+                      borderRadius: 12,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    <Wallet size={24} color={colors.success} />
+                    <Text style={{ color: colors.success }}>
+                      {currentBalance.walletBalance.toFixed(2)} $
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      borderRadius: 12,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    <UtensilsCrossed size={24} color={colors.primary} />
+                    <Text style={{ color: colors.success }}>
+                      {currentBalance.mealPoints} <Star size={16} color={colors.success} />
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      borderRadius: 12,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    <Coffee size={24} color={colors.secondary} />
+                    <Text style={{ color: colors.success }}>
+                      {currentBalance.drinkPoints} <Star size={16} color={colors.success} />
+                    </Text>
+                  </View>
+                </View>
+                <Text style={[styles.paymentButtonText, { color: colors.text }]}>
+                  {t('home.payWallet')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </ScrollView>
 
-      <PaymentModal
-        visible={paymentModalVisible}
-        onClose={() => setPaymentModalVisible(false)}
-        initialPaymentType={selectedPaymentType}
-      />
+      {!isRestaurant && (
+        <PaymentModal
+          visible={paymentModalVisible}
+          onClose={() => setPaymentModalVisible(false)}
+          initialPaymentType={selectedPaymentType}
+        />
+      )}
     </>
   );
 }
@@ -267,5 +333,42 @@ const styles = StyleSheet.create({
   },
   paymentButtonDesc: {
     fontSize: 14,
+  },
+  restaurantSection: {
+    marginBottom: 24,
+  },
+  restaurantTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  qrCodesContainer: {
+    gap: 20,
+  },
+  qrCodeCard: {
+    padding: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  qrCodeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  qrCodeTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  qrCodeWrapper: {
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: 'white',
   },
 });

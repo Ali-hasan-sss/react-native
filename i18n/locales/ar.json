@@ -107,6 +107,23 @@
     "success": "نجح",
     "close": "إغلاق",
     "apply": "تطبيق",
-    "clear": "مسح"
+    "clear": "مسح",
+    "and": "و"
+  },
+  "restaurant": {
+    "mealsCode": "رمز الوجبات",
+    "drinksCode": "رمز المشروبات",
+    "createAd": "إنشاء إعلان",
+    "adImage": "صورة الإعلان",
+    "uploadImage": "رفع صورة",
+    "adTitle": "عنوان الإعلان",
+    "adTitlePlaceholder": "أدخل عنوان الإعلان...",
+    "adDetails": "تفاصيل الإعلان",
+    "adDetailsPlaceholder": "أدخل وصف الإعلان...",
+    "adType": "نوع الإعلان",
+    "scans": "المسح الضوئي",
+    "recentScans": "المسح الأخير",
+    "planManagement": "إدارة الخطة",
+    "upgradePlan": "ترقية الخطة"
   }
 }

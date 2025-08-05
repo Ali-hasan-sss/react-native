@@ -6,6 +6,7 @@ interface AuthState {
     id: string;
     email: string;
     name: string;
+    accountType: 'user' | 'restaurant';
   } | null;
   loading: boolean;
 }
@@ -24,8 +25,9 @@ const authSlice = createSlice({
       state.loading = true;
     },
     loginSuccess: (state, action: PayloadAction<{ id: string; email: string; name: string }>) => {
+      const accountType = action.payload.email === 'restaurant@example.com' ? 'restaurant' : 'user';
       state.isAuthenticated = true;
-      state.user = action.payload;
+      state.user = { ...action.payload, accountType };
       state.loading = false;
     },
     loginFailure: (state) => {
@@ -40,6 +42,8 @@ const authSlice = createSlice({
       if (state.user) {
         state.user.name = action.payload.name;
         state.user.email = action.payload.email;
+        const accountType = action.payload.email === 'restaurant@example.com' ? 'restaurant' : 'user';
+        state.user.accountType = accountType;
       }
     },
   },

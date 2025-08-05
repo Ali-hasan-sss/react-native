@@ -107,6 +107,23 @@
     "success": "Erfolg",
     "close": "Schließen",
     "apply": "Anwenden",
-    "clear": "Löschen"
+    "clear": "Löschen",
+    "and": "und"
+  },
+  "restaurant": {
+    "mealsCode": "Mahlzeiten-Code",
+    "drinksCode": "Getränke-Code",
+    "createAd": "Anzeige erstellen",
+    "adImage": "Anzeigenbild",
+    "uploadImage": "Bild hochladen",
+    "adTitle": "Anzeigentitel",
+    "adTitlePlaceholder": "Anzeigentitel eingeben...",
+    "adDetails": "Anzeigendetails",
+    "adDetailsPlaceholder": "Anzeigenbeschreibung eingeben...",
+    "adType": "Anzeigentyp",
+    "scans": "Scans",
+    "recentScans": "Aktuelle Scans",
+    "planManagement": "Plan-Verwaltung",
+    "upgradePlan": "Plan upgraden"
   }
 }

@@ -107,6 +107,23 @@
     "success": "Success",
     "close": "Close",
     "apply": "Apply",
-    "clear": "Clear"
+    "clear": "Clear",
+    "and": "and"
+  },
+  "restaurant": {
+    "mealsCode": "Meals Code",
+    "drinksCode": "Drinks Code",
+    "createAd": "Create Ad",
+    "adImage": "Ad Image",
+    "uploadImage": "Upload Image",
+    "adTitle": "Ad Title",
+    "adTitlePlaceholder": "Enter ad title...",
+    "adDetails": "Ad Details",
+    "adDetailsPlaceholder": "Enter ad description...",
+    "adType": "Ad Type",
+    "scans": "Scans",
+    "recentScans": "Recent Scans",
+    "planManagement": "Plan Management",
+    "upgradePlan": "Upgrade Plan"
   }
 }
