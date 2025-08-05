@@ -8,7 +8,6 @@ import {
   TextInput,
   Modal,
   Alert,
-  FlatList,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
@@ -21,51 +20,13 @@ import {
   Coffee,
   UtensilsCrossed,
   Wallet,
-  Clock,
-  Star,
+  QrCode,
 } from 'lucide-react-native';
 import { RootState } from '@/store/store';
 import { useTheme } from '@/hooks/useTheme';
 import { router } from 'expo-router';
-import QRCode from 'react-native-qrcode-svg';
-import {
-  RestaurantSelector,
-  Restaurant,
-} from '@/components/RestaurantSelector';
+import { RestaurantSelector } from '@/components/RestaurantSelector';
 
-interface ScanRecord {
-  id: string;
-  timestamp: string;
-  pointsConsumed: number;
-  type: 'meal' | 'drink';
-}
-
-const mockScanRecords: ScanRecord[] = [
-  {
-    id: '1',
-    timestamp: '2025-01-15 14:30',
-    pointsConsumed: 50,
-    type: 'meal',
-  },
-  {
-    id: '2',
-    timestamp: '2025-01-15 10:15',
-    pointsConsumed: 25,
-    type: 'drink',
-  },
-  {
-    id: '3',
-    timestamp: '2025-01-14 16:45',
-    pointsConsumed: 75,
-    type: 'meal',
-  },
-  {
-    id: '4',
-    timestamp: '2025-01-14 12:20',
-    pointsConsumed: 30,
-    type: 'drink',
-  },
-];
 export default function PurchaseScreen() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -79,8 +40,6 @@ export default function PurchaseScreen() {
     'wallet' | 'drink' | 'meal'
   >('wallet');
   const [giftAmount, setGiftAmount] = useState('');
-
-  const isRestaurant = auth.user?.accountType === 'restaurant';
 
   // Use selected restaurant's balance or fallback to default
   const currentBalance = selectedRestaurant?.userBalance || {
@@ -134,379 +93,274 @@ export default function PurchaseScreen() {
   };
 
   const handleReceiveFromFriend = () => {
-    router.push('/camera/receive-scan');
+    router.push({
+      pathname: '/(tabs)/account',
+      params: { scrollToQr: 'true' },
+    });
   };
 
-  const renderScanRecord = ({ item }: { item: ScanRecord }) => (
-    <View style={[styles.scanRecord, { backgroundColor: colors.surface }]}>
-      <View style={styles.scanRecordHeader}>
-        <View style={styles.scanRecordIcon}>
-          {item.type === 'meal' ? (
-            <UtensilsCrossed size={20} color={colors.primary} />
-          ) : (
-            <Coffee size={20} color={colors.secondary} />
-          )}
-        </View>
-        <View style={styles.scanRecordInfo}>
-          <Text style={[styles.scanRecordType, { color: colors.text }]}>
-            {item.type === 'meal'
-              ? t('promotions.food')
-              : t('promotions.drinks')}
-          </Text>
-          <View style={styles.scanRecordDetails}>
-            <Clock size={14} color={colors.textSecondary} />
-            <Text
-              style={[styles.scanRecordTime, { color: colors.textSecondary }]}
-            >
-              {item.timestamp}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.scanRecordPoints}>
-          <Text style={[styles.pointsConsumed, { color: colors.error }]}>
-            -{item.pointsConsumed}
-          </Text>
-          <Star size={16} color={colors.error} />
-        </View>
-      </View>
-    </View>
-  );
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>
-          {isRestaurant ? t('restaurant.scans') : t('purchase.title')}
+          {t('purchase.title')}
         </Text>
       </View>
 
-      {!isRestaurant && (
-        <View style={styles.restaurantSection}>
-          <RestaurantSelector />
-        </View>
-      )}
+      <View style={styles.restaurantSection}>
+        <RestaurantSelector />
+      </View>
 
-      {!isRestaurant && (
-        <View style={styles.balanceSection}>
-          <View style={styles.balanceRow}>
-            <View
-              style={[styles.balanceCard, { backgroundColor: colors.surface }]}
-            >
-              <View
-                style={[
-                  styles.balanceIcon,
-                  { backgroundColor: colors.primary + '20' },
-                ]}
-              >
-                <UtensilsCrossed size={24} color={colors.primary} />
-              </View>
-              <Text
-                style={[styles.balanceLabel, { color: colors.textSecondary }]}
-              >
-                {t('purchase.mealPoints')}
-              </Text>
-              <Text style={[styles.balanceValue, { color: colors.text }]}>
-                {currentBalance.mealPoints}
-              </Text>
-            </View>
-
-            <View
-              style={[styles.balanceCard, { backgroundColor: colors.surface }]}
-            >
-              <View
-                style={[
-                  styles.balanceIcon,
-                  { backgroundColor: colors.secondary + '20' },
-                ]}
-              >
-                <Coffee size={24} color={colors.secondary} />
-              </View>
-              <Text
-                style={[styles.balanceLabel, { color: colors.textSecondary }]}
-              >
-                {t('purchase.drinkPoints')}
-              </Text>
-              <Text style={[styles.balanceValue, { color: colors.text }]}>
-                {currentBalance.drinkPoints}
-              </Text>
-            </View>
-          </View>
-
+      <View style={styles.balanceSection}>
+        <View style={styles.balanceRow}>
           <View
-            style={[styles.walletCard, { backgroundColor: colors.surface }]}
+            style={[styles.balanceCard, { backgroundColor: colors.surface }]}
           >
             <View
               style={[
                 styles.balanceIcon,
-                { backgroundColor: colors.success + '20' },
+                { backgroundColor: colors.primary + '20' },
               ]}
             >
-              <Wallet size={24} color={colors.success} />
+              <UtensilsCrossed size={24} color={colors.primary} />
             </View>
-            <View style={styles.walletContent}>
-              <Text
-                style={[styles.balanceLabel, { color: colors.textSecondary }]}
+            <Text
+              style={[styles.balanceLabel, { color: colors.textSecondary }]}
+            >
+              {t('purchase.mealPoints')}
+            </Text>
+            <Text style={[styles.balanceValue, { color: colors.text }]}>
+              {currentBalance.mealPoints}
+            </Text>
+          </View>
+
+          <View
+            style={[styles.balanceCard, { backgroundColor: colors.surface }]}
+          >
+            <View
+              style={[
+                styles.balanceIcon,
+                { backgroundColor: colors.secondary + '20' },
+              ]}
+            >
+              <Coffee size={24} color={colors.secondary} />
+            </View>
+            <Text
+              style={[styles.balanceLabel, { color: colors.textSecondary }]}
+            >
+              {t('purchase.drinkPoints')}
+            </Text>
+            <Text style={[styles.balanceValue, { color: colors.text }]}>
+              {currentBalance.drinkPoints}
+            </Text>
+          </View>
+        </View>
+
+        <View style={[styles.walletCard, { backgroundColor: colors.surface }]}>
+          <View
+            style={[
+              styles.balanceIcon,
+              { backgroundColor: colors.success + '20' },
+            ]}
+          >
+            <Wallet size={24} color={colors.success} />
+          </View>
+          <View style={styles.walletContent}>
+            <Text
+              style={[styles.balanceLabel, { color: colors.textSecondary }]}
+            >
+              {t('purchase.walletBalance')}
+            </Text>
+            <Text style={[styles.walletValue, { color: colors.text }]}>
+              ${currentBalance.walletBalance.toFixed(2)}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <ScrollView style={styles.content}>
+        <TouchableOpacity
+          style={[styles.actionCard, { backgroundColor: colors.surface }]}
+          onPress={handleRecharge}
+        >
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: colors.primary + '20' },
+            ]}
+          >
+            <CreditCard size={32} color={colors.primary} />
+          </View>
+          <View style={styles.cardContent}>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>
+              {t('purchase.recharge')}
+            </Text>
+            <Text
+              style={[styles.cardDescription, { color: colors.textSecondary }]}
+            >
+              {t('purchase.rechargeDesc')}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionCard, { backgroundColor: colors.surface }]}
+          onPress={handleGiftFriend}
+        >
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: colors.secondary + '20' },
+            ]}
+          >
+            <Gift size={32} color={colors.secondary} />
+          </View>
+          <View style={styles.cardContent}>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>
+              {t('purchase.gift')}
+            </Text>
+            <Text
+              style={[styles.cardDescription, { color: colors.textSecondary }]}
+            >
+              {t('purchase.giftDesc')}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.actionCard, { backgroundColor: colors.surface }]}
+          onPress={handleReceiveFromFriend}
+        >
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: colors.primary + '20' },
+            ]}
+          >
+            <QrCode size={32} color={colors.primary} />
+          </View>
+          <View style={[{ backgroundColor: colors.surface }]}>
+            <Text style={[{ color: colors.text }]}>
+              {t('account.myQRCode')}
+            </Text>
+            <Text
+              style={[styles.qrDescription, { color: colors.textSecondary }]}
+            >
+              {t('account.qrCodeDesc')}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </ScrollView>
+
+      <Modal
+        visible={giftModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setGiftModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View
+            style={[styles.modalContent, { backgroundColor: colors.surface }]}
+          >
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {t('purchase.giftOptions')}
+            </Text>
+
+            <View style={styles.giftTypeContainer}>
+              {[
+                { type: 'wallet', label: t('purchase.walletBalance') },
+                { type: 'drink', label: t('purchase.drinkPoints') },
+                { type: 'meal', label: t('purchase.mealPoints') },
+              ].map((option) => (
+                <TouchableOpacity
+                  key={option.type}
+                  style={[
+                    styles.giftTypeButton,
+                    {
+                      backgroundColor:
+                        selectedGiftType === option.type
+                          ? colors.primary
+                          : colors.background,
+                    },
+                  ]}
+                  onPress={() => setSelectedGiftType(option.type as any)}
+                >
+                  <Text
+                    style={[
+                      styles.giftTypeText,
+                      {
+                        color:
+                          selectedGiftType === option.type
+                            ? 'white'
+                            : colors.text,
+                      },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TextInput
+              style={[
+                styles.amountInput,
+                { backgroundColor: colors.background, color: colors.text },
+              ]}
+              placeholder={t('purchase.amount')}
+              placeholderTextColor={colors.textSecondary}
+              value={giftAmount}
+              onChangeText={setGiftAmount}
+              keyboardType="numeric"
+            />
+
+            <Text style={[styles.scanTitle, { color: colors.text }]}>
+              {t('purchase.scanOrUpload')}
+            </Text>
+
+            <View style={styles.scanOptions}>
+              <TouchableOpacity
+                style={[styles.scanButton, { backgroundColor: colors.primary }]}
+                onPress={handleScanForGift}
               >
-                {t('purchase.walletBalance')}
-              </Text>
-              <Text style={[styles.walletValue, { color: colors.text }]}>
-                ${currentBalance.walletBalance.toFixed(2)}
-              </Text>
+                <Camera size={20} color="white" />
+                <Text style={styles.scanButtonText}>Scan</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.scanButton,
+                  { backgroundColor: colors.secondary },
+                ]}
+                onPress={handleUploadImage}
+              >
+                <ImageIcon size={20} color="white" />
+                <Text style={styles.scanButtonText}>Upload</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: colors.border }]}
+                onPress={() => setGiftModalVisible(false)}
+              >
+                <Text style={[styles.modalButtonText, { color: colors.text }]}>
+                  {t('common.cancel')}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.modalButton,
+                  { backgroundColor: colors.primary },
+                ]}
+                onPress={sendGift}
+              >
+                <Text style={styles.modalButtonText}>{t('purchase.send')}</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
-      )}
-
-      <ScrollView style={styles.content}>
-        {isRestaurant ? (
-          <View style={styles.scansList}>
-            <Text style={[styles.scansTitle, { color: colors.text }]}>
-              {t('restaurant.recentScans')}
-            </Text>
-            <FlatList
-              data={mockScanRecords}
-              renderItem={renderScanRecord}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-              ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-            />
-          </View>
-        ) : (
-          <>
-            <TouchableOpacity
-              style={[styles.actionCard, { backgroundColor: colors.surface }]}
-              onPress={handleRecharge}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: colors.primary + '20' },
-                ]}
-              >
-                <CreditCard size={32} color={colors.primary} />
-              </View>
-              <View style={styles.cardContent}>
-                <Text style={[styles.cardTitle, { color: colors.text }]}>
-                  {t('purchase.recharge')}
-                </Text>
-                <Text
-                  style={[
-                    styles.cardDescription,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  {t('purchase.rechargeDesc')}
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.actionCard, { backgroundColor: colors.surface }]}
-              onPress={handleGiftFriend}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: colors.secondary + '20' },
-                ]}
-              >
-                <Gift size={32} color={colors.secondary} />
-              </View>
-              <View style={styles.cardContent}>
-                <Text style={[styles.cardTitle, { color: colors.text }]}>
-                  {t('purchase.gift')}
-                </Text>
-                <Text
-                  style={[
-                    styles.cardDescription,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  {t('purchase.giftDesc')}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <View style={[{ backgroundColor: colors.surface }]}>
-              <View
-                style={[styles.qrCard, { backgroundColor: colors.surface }]}
-              >
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: colors.primary + '20' },
-                  ]}
-                >
-                  <Camera size={32} color={colors.primary} />
-                </View>
-                <View style={[{ backgroundColor: colors.surface }]}>
-                  <Text style={[{ color: colors.text }]}>
-                    {t('account.myQRCode')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.qrDescription,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
-                    {t('account.qrCodeDesc')}
-                  </Text>
-                </View>
-                <View style={styles.qrContainer}>
-                  {auth.user ? (
-                    <QRCode
-                      value={JSON.stringify({
-                        userId: auth.user.id,
-                        email: auth.user.email,
-                      })}
-                      size={200}
-                      color={colors.text}
-                      backgroundColor={colors.background}
-                    />
-                  ) : (
-                    <View
-                      style={[
-                        styles.qrPlaceholder,
-                        { backgroundColor: colors.background },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.qrPlaceholderText,
-                          { color: colors.textSecondary },
-                        ]}
-                      >
-                        QR Code
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            </View>
-          </>
-        )}
-      </ScrollView>
-
-      {!isRestaurant && (
-        <Modal
-          visible={giftModalVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setGiftModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View
-              style={[styles.modalContent, { backgroundColor: colors.surface }]}
-            >
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
-                {t('purchase.giftOptions')}
-              </Text>
-
-              <View style={styles.giftTypeContainer}>
-                {[
-                  { type: 'wallet', label: t('purchase.walletBalance') },
-                  { type: 'drink', label: t('purchase.drinkPoints') },
-                  { type: 'meal', label: t('purchase.mealPoints') },
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option.type}
-                    style={[
-                      styles.giftTypeButton,
-                      {
-                        backgroundColor:
-                          selectedGiftType === option.type
-                            ? colors.primary
-                            : colors.background,
-                      },
-                    ]}
-                    onPress={() => setSelectedGiftType(option.type as any)}
-                  >
-                    <Text
-                      style={[
-                        styles.giftTypeText,
-                        {
-                          color:
-                            selectedGiftType === option.type
-                              ? 'white'
-                              : colors.text,
-                        },
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <TextInput
-                style={[
-                  styles.amountInput,
-                  { backgroundColor: colors.background, color: colors.text },
-                ]}
-                placeholder={t('purchase.amount')}
-                placeholderTextColor={colors.textSecondary}
-                value={giftAmount}
-                onChangeText={setGiftAmount}
-                keyboardType="numeric"
-              />
-
-              <Text style={[styles.scanTitle, { color: colors.text }]}>
-                {t('purchase.scanOrUpload')}
-              </Text>
-
-              <View style={styles.scanOptions}>
-                <TouchableOpacity
-                  style={[
-                    styles.scanButton,
-                    { backgroundColor: colors.primary },
-                  ]}
-                  onPress={handleScanForGift}
-                >
-                  <Camera size={20} color="white" />
-                  <Text style={styles.scanButtonText}>Scan</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.scanButton,
-                    { backgroundColor: colors.secondary },
-                  ]}
-                  onPress={handleUploadImage}
-                >
-                  <ImageIcon size={20} color="white" />
-                  <Text style={styles.scanButtonText}>Upload</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={[
-                    styles.modalButton,
-                    { backgroundColor: colors.border },
-                  ]}
-                  onPress={() => setGiftModalVisible(false)}
-                >
-                  <Text
-                    style={[styles.modalButtonText, { color: colors.text }]}
-                  >
-                    {t('common.cancel')}
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.modalButton,
-                    { backgroundColor: colors.primary },
-                  ]}
-                  onPress={sendGift}
-                >
-                  <Text style={styles.modalButtonText}>
-                    {t('purchase.send')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
+      </Modal>
     </View>
   );
 }
@@ -533,12 +387,12 @@ const styles = StyleSheet.create({
   },
   balanceRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     marginBottom: 12,
   },
   balanceCard: {
     flex: 1,
-    padding: 16,
+    padding: 8,
     borderRadius: 12,
     alignItems: 'center',
     shadowColor: '#000',
@@ -550,7 +404,7 @@ const styles = StyleSheet.create({
   walletCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 10,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -601,15 +455,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  qrCard: {
-    borderRadius: 16,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    marginBottom: 16,
-    elevation: 2,
-  },
+
   iconContainer: {
     width: 60,
     height: 60,
@@ -722,60 +568,5 @@ const styles = StyleSheet.create({
   },
   qrPlaceholderText: {
     fontSize: 16,
-  },
-  scansList: {
-    flex: 1,
-  },
-  scansTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  scanRecord: {
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  scanRecordHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  scanRecordIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  scanRecordInfo: {
-    flex: 1,
-  },
-  scanRecordType: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  scanRecordDetails: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  scanRecordTime: {
-    fontSize: 14,
-  },
-  scanRecordPoints: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  pointsConsumed: {
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
