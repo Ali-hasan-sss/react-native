@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -85,7 +85,10 @@ export function DrawerMenu({ onClose }: DrawerMenuProps) {
                   key={theme}
                   style={[
                     styles.option,
-                    { backgroundColor: mode === theme ? colors.primary : colors.surface },
+                    {
+                      backgroundColor:
+                        mode === theme ? colors.primary : colors.surface,
+                    },
                   ]}
                   onPress={() => handleThemeChange(theme)}
                 >
@@ -119,14 +122,22 @@ export function DrawerMenu({ onClose }: DrawerMenuProps) {
                   key={lang.code}
                   style={[
                     styles.option,
-                    { backgroundColor: currentLanguage === lang.code ? colors.primary : colors.surface },
+                    {
+                      backgroundColor:
+                        currentLanguage === lang.code
+                          ? colors.primary
+                          : colors.surface,
+                    },
                   ]}
                   onPress={() => handleLanguageChange(lang.code)}
                 >
                   <Text
                     style={[
                       styles.optionText,
-                      { color: currentLanguage === lang.code ? 'white' : colors.text },
+                      {
+                        color:
+                          currentLanguage === lang.code ? 'white' : colors.text,
+                      },
                     ]}
                   >
                     {lang.label}
@@ -136,7 +147,7 @@ export function DrawerMenu({ onClose }: DrawerMenuProps) {
             </View>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.menuItem}
             onPress={() => setTermsModalVisible(true)}
           >
@@ -146,7 +157,7 @@ export function DrawerMenu({ onClose }: DrawerMenuProps) {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.menuItem}
             onPress={() => setPrivacyModalVisible(true)}
           >

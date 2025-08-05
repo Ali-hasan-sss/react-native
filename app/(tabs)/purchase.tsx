@@ -20,19 +20,21 @@ import {
   Coffee,
   UtensilsCrossed,
   Wallet,
+  QrCode,
 } from 'lucide-react-native';
 import { RootState } from '@/store/store';
 import { useTheme } from '@/hooks/useTheme';
 import { router } from 'expo-router';
-import QRCode from 'react-native-qrcode-svg';
-import { RestaurantSelector, Restaurant } from '@/components/RestaurantSelector';
+import { RestaurantSelector } from '@/components/RestaurantSelector';
 
 export default function PurchaseScreen() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { colors } = useTheme();
   const auth = useSelector((state: RootState) => state.auth);
-  const selectedRestaurant = useSelector((state: RootState) => state.restaurant.selectedRestaurant);
+  const selectedRestaurant = useSelector(
+    (state: RootState) => state.restaurant.selectedRestaurant
+  );
   const [giftModalVisible, setGiftModalVisible] = useState(false);
   const [selectedGiftType, setSelectedGiftType] = useState<
     'wallet' | 'drink' | 'meal'
@@ -91,7 +93,10 @@ export default function PurchaseScreen() {
   };
 
   const handleReceiveFromFriend = () => {
-    router.push('/camera/receive-scan');
+    router.push({
+      pathname: '/(tabs)/account',
+      params: { scrollToQr: 'true' },
+    });
   };
 
   return (
@@ -221,57 +226,29 @@ export default function PurchaseScreen() {
             </Text>
           </View>
         </TouchableOpacity>
-        <View style={[{ backgroundColor: colors.surface }]}>
+        <TouchableOpacity
+          style={[styles.actionCard, { backgroundColor: colors.surface }]}
+          onPress={handleReceiveFromFriend}
+        >
           <View
-            style={[styles.qrCard, { backgroundColor: colors.surface }]}
-            //onPress={handleReceiveFromFriend}
+            style={[
+              styles.iconContainer,
+              { backgroundColor: colors.primary + '20' },
+            ]}
           >
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: colors.primary + '20' },
-              ]}
-            >
-              <Camera size={32} color={colors.primary} />
-            </View>
-            <View style={[{ backgroundColor: colors.surface }]}>
-              <Text style={[{ color: colors.text }]}>
-                {t('account.myQRCode')}
-              </Text>
-              <Text
-                style={[styles.qrDescription, { color: colors.textSecondary }]}
-              >
-                {t('account.qrCodeDesc')}
-              </Text>
-            </View>
-            <View style={styles.qrContainer}>
-              {auth.user ? (
-                <QRCode
-                  value={JSON.stringify({ userId: auth.user.id, email: auth.user.email })}
-                  size={200}
-                  color={colors.text}
-                  backgroundColor={colors.background}
-                />
-              ) : (
-                <View
-                  style={[
-                    styles.qrPlaceholder,
-                    { backgroundColor: colors.background },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.qrPlaceholderText,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
-                    QR Code
-                  </Text>
-                </View>
-              )}
-            </View>
+            <QrCode size={32} color={colors.primary} />
           </View>
-        </View>
+          <View style={[{ backgroundColor: colors.surface }]}>
+            <Text style={[{ color: colors.text }]}>
+              {t('account.myQRCode')}
+            </Text>
+            <Text
+              style={[styles.qrDescription, { color: colors.textSecondary }]}
+            >
+              {t('account.qrCodeDesc')}
+            </Text>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
 
       <Modal
@@ -410,12 +387,12 @@ const styles = StyleSheet.create({
   },
   balanceRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     marginBottom: 12,
   },
   balanceCard: {
     flex: 1,
-    padding: 16,
+    padding: 8,
     borderRadius: 12,
     alignItems: 'center',
     shadowColor: '#000',
@@ -427,7 +404,7 @@ const styles = StyleSheet.create({
   walletCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 10,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -478,15 +455,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  qrCard: {
-    borderRadius: 16,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    marginBottom: 16,
-    elevation: 2,
-  },
+
   iconContainer: {
     width: 60,
     height: 60,

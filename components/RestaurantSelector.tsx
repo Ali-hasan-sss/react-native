@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Check,X } from 'lucide-react-native';
+import { ChevronDown, Check, X } from 'lucide-react-native';
 import { RootState } from '@/store/store';
 import { setSelectedRestaurant } from '@/store/slices/restaurantSlice';
 import { useTheme } from '@/hooks/useTheme';
@@ -41,7 +41,7 @@ export const mockRestaurants: Restaurant[] = [
     name: 'Pizza Palace',
     address: '456 Italian Avenue, City Center',
     userBalance: {
-      walletBalance: 89.50,
+      walletBalance: 89.5,
       drinkPoints: 18,
       mealPoints: 8,
     },
@@ -56,17 +56,51 @@ export const mockRestaurants: Restaurant[] = [
       mealPoints: 15,
     },
   },
+  {
+    id: '4',
+    name: 'Burger Barn',
+    address: '789 Grill Road, Food District',
+    userBalance: {
+      walletBalance: 203.25,
+      drinkPoints: 32,
+      mealPoints: 15,
+    },
+  },
+  {
+    id: '5',
+    name: 'Burger Barn',
+    address: '789 Grill Road, Food District',
+    userBalance: {
+      walletBalance: 203.25,
+      drinkPoints: 32,
+      mealPoints: 15,
+    },
+  },
+  {
+    id: '6',
+    name: 'Burger Barn',
+    address: '789 Grill Road, Food District',
+    userBalance: {
+      walletBalance: 203.25,
+      drinkPoints: 32,
+      mealPoints: 15,
+    },
+  },
 ];
 
 interface RestaurantSelectorProps {
   onRestaurantChange?: (restaurant: Restaurant) => void;
 }
 
-export function RestaurantSelector({ onRestaurantChange }: RestaurantSelectorProps) {
+export function RestaurantSelector({
+  onRestaurantChange,
+}: RestaurantSelectorProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const dispatch = useDispatch();
-  const selectedRestaurant = useSelector((state: RootState) => state.restaurant.selectedRestaurant);
+  const selectedRestaurant = useSelector(
+    (state: RootState) => state.restaurant.selectedRestaurant
+  );
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleSelectRestaurant = (restaurant: Restaurant) => {
@@ -80,8 +114,12 @@ export function RestaurantSelector({ onRestaurantChange }: RestaurantSelectorPro
       style={[
         styles.restaurantItem,
         {
-          backgroundColor: selectedRestaurant?.id === item.id ? colors.primary + '20' : colors.surface,
-          borderColor: selectedRestaurant?.id === item.id ? colors.primary : colors.border,
+          backgroundColor:
+            selectedRestaurant?.id === item.id
+              ? colors.primary + '20'
+              : colors.surface,
+          borderColor:
+            selectedRestaurant?.id === item.id ? colors.primary : colors.border,
         },
       ]}
       onPress={() => handleSelectRestaurant(item)}
@@ -90,7 +128,9 @@ export function RestaurantSelector({ onRestaurantChange }: RestaurantSelectorPro
         <Text style={[styles.restaurantName, { color: colors.text }]}>
           {item.name}
         </Text>
-        <Text style={[styles.restaurantAddress, { color: colors.textSecondary }]}>
+        <Text
+          style={[styles.restaurantAddress, { color: colors.textSecondary }]}
+        >
           {item.address}
         </Text>
       </View>
@@ -103,7 +143,10 @@ export function RestaurantSelector({ onRestaurantChange }: RestaurantSelectorPro
   return (
     <>
       <TouchableOpacity
-        style={[styles.selector, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        style={[
+          styles.selector,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
         onPress={() => setModalVisible(true)}
       >
         <View style={styles.selectorContent}>
@@ -124,8 +167,15 @@ export function RestaurantSelector({ onRestaurantChange }: RestaurantSelectorPro
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+          <View
+            style={[
+              styles.modalContent,
+              { backgroundColor: colors.background },
+            ]}
+          >
+            <View
+              style={[styles.modalHeader, { borderBottomColor: colors.border }]}
+            >
               <Text style={[styles.modalTitle, { color: colors.text }]}>
                 Select Restaurant
               </Text>

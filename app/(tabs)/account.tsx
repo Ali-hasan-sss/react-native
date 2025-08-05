@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,9 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  InteractionManager,
+  findNodeHandle,
+  UIManager,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +19,12 @@ import { RootState } from '@/store/store';
 import { updateProfile } from '@/store/slices/authSlice';
 import { updatePhoneNumber, generateQRCode } from '@/store/slices/userSlice';
 import { useTheme } from '@/hooks/useTheme';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { RouteProp, useRoute } from '@react-navigation/native';
+
+type AccountScreenParams = {
+  scrollToQr?: boolean;
+};
 
 export default function AccountScreen() {
   const { t } = useTranslation();
@@ -30,6 +39,12 @@ export default function AccountScreen() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const route =
+    useRoute<RouteProp<{ Account: AccountScreenParams }, 'Account'>>();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const qrRef = useRef(null);
+
+  const { scrollTo } = useLocalSearchParams<{ scrollTo?: string }>();
 
   React.useEffect(() => {
     // Generate QR code when component mounts
@@ -65,9 +80,39 @@ export default function AccountScreen() {
     setNewPassword('');
     setConfirmNewPassword('');
   };
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params?.scrollToQr) {
+        scrollToQrSection();
+      }
+    }, [route.params?.scrollToQr])
+  );
+
+  const scrollToQrSection = () => {
+    const scrollViewHandle = findNodeHandle(scrollViewRef.current);
+    const qrHandle = findNodeHandle(qrRef.current);
+
+    if (scrollViewHandle && qrHandle) {
+      InteractionManager.runAfterInteractions(() => {
+        UIManager.measureLayout(
+          qrHandle,
+          scrollViewHandle,
+          () => {
+            console.warn('measureLayout failed');
+          },
+          (x, y) => {
+            scrollViewRef.current?.scrollTo({ y, animated: true });
+          }
+        );
+      });
+    }
+  };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      ref={scrollViewRef}
+    >
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>
           {t('account.title')}
@@ -170,7 +215,9 @@ export default function AccountScreen() {
             onPress={handleUpdatePassword}
           >
             <Lock size={20} color="white" />
-            <Text style={styles.saveButtonText}>{t('account.updatePassword')}</Text>
+            <Text style={styles.saveButtonText}>
+              {t('account.updatePassword')}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -181,8 +228,8 @@ export default function AccountScreen() {
           <Text style={[styles.qrDescription, { color: colors.textSecondary }]}>
             {t('account.qrCodeDesc')}
           </Text>
-          
-          <View style={styles.qrContainer}>
+
+          <View style={styles.qrContainer} id="qr" ref={qrRef}>
             {user.qrCode ? (
               <QRCode
                 value={user.qrCode}
@@ -191,8 +238,18 @@ export default function AccountScreen() {
                 backgroundColor={colors.background}
               />
             ) : (
-              <View style={[styles.qrPlaceholder, { backgroundColor: colors.background }]}>
-                <Text style={[styles.qrPlaceholderText, { color: colors.textSecondary }]}>
+              <View
+                style={[
+                  styles.qrPlaceholder,
+                  { backgroundColor: colors.background },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.qrPlaceholderText,
+                    { color: colors.textSecondary },
+                  ]}
+                >
                   QR Code
                 </Text>
               </View>
